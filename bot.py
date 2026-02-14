@@ -5,6 +5,8 @@ import os
 
 
 from datetime import time
+import pytz
+
 
 from telegram import (
     Update,
@@ -417,11 +419,15 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ---------- ЕЖЕДНЕВНЫЕ КОМПЛИМЕНТЫ ----------
 async def send_daily_compliment(context: ContextTypes.DEFAULT_TYPE):
+    print("🔥 Функция send_daily_compliment вызвана")
+
     with open("compliments.json", "r", encoding="utf-8") as f:
         compliments = json.load(f)
 
     day_index = context.job.data["day"]
     chat_id = context.job.data["chat_id"]
+
+    print("➡ Отправляем комплимент номер:", day_index)
 
     if day_index < len(compliments):
         await context.bot.send_message(
@@ -430,15 +436,21 @@ async def send_daily_compliment(context: ContextTypes.DEFAULT_TYPE):
         )
         context.job.data["day"] += 1
 
+        print("✅ Комплимент отправлен")
+
+
 
 async def start_daily_compliments(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
 
+    tz = pytz.timezone("Europe/Moscow")  # поменяй если нужно
+
     context.job_queue.run_daily(
         send_daily_compliment,
-        time=time(hour=11, minute=10),
+        time=time(hour=11, minute=10, tzinfo=tz),
         data={"chat_id": chat_id, "day": 0},
     )
+
 
 
 # ---------- ЗАПУСК ----------
