@@ -485,7 +485,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # запускаем ежедневную задачу
         context.job_queue.run_daily(
             send_daily_compliment,
-            time=time(hour=13, minute=28, tzinfo=ZoneInfo("Europe/Moscow")),
+            time=time(hour=13, minute=44, tzinfo=ZoneInfo("Europe/Moscow")),
             data={"chat_id": chat_id},
             name=str(chat_id),
         )
