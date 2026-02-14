@@ -60,7 +60,7 @@ async def hacker_print(message, text):
             loading_message,
             f"⚡ Запрос принят...\n{noise}"
         )
-        await asyncio.sleep(0.2)
+        await asyncio.sleep(0.4)
 
     steps = 6
     length = len(text)
@@ -71,7 +71,7 @@ async def hacker_print(message, text):
             loading_message,
             f"🔓 Обращаюсь к серверу расшифровки...\n{part}"
         )
-        await asyncio.sleep(0.15)
+        await asyncio.sleep(0.4)
 
     await safe_edit(loading_message, text, parse_html=True)
 
