@@ -24,6 +24,9 @@ from telegram.ext import (
 )
 
 from telegram.error import BadRequest
+from telegram import BotCommand
+
+
 
 TOKEN = os.getenv("BOT_TOKEN")
 
@@ -117,6 +120,33 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Жду пока ты нажмешь на кнопочку 🌚",
         reply_markup=reply_markup,
     )
+
+async def subscribe_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "Подключаю любовный сервер 💞",
+        reply_markup=ReplyKeyboardRemove(),
+    )
+
+    await hacker_print(update.message, "Буквально немного времени 🕰")
+
+    await start_daily_compliments(update, context)
+
+    await hacker_print(
+        update.message,
+        "💘 Твоя подписка активирована.\nТеперь я буду с тобой ежедневно 🤍"
+    )
+
+
+async def restart_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "Перезапуск сценария...",
+        reply_markup=ReplyKeyboardRemove(),
+    )
+
+    await hacker_print(update.message, "❌ Система очищает предыдущий маршрут...")
+    await hacker_print(update.message, "✅ Возврат к исходной точке выполнен")
+
+    await start(update, context)
 
 
 # ---------- СПРОСИТЬ ПРО ДЕНЬ ----------
@@ -535,6 +565,13 @@ async def start_daily_compliments(update: Update, context: ContextTypes.DEFAULT_
 
     await send_compliment_now(context, chat_id)
 
+async def set_commands(app):
+    await app.bot.set_my_commands([
+        BotCommand("start", "Запустить бота 💌"),
+        BotCommand("subscribe", "Активировать любовную подписку 💖"),
+        BotCommand("restart", "Вернуться в начало 🔄"),
+
+    ])
 
 # ---------- ЗАПУСК ----------
 
@@ -544,7 +581,13 @@ if __name__ == "__main__":
     app = ApplicationBuilder().token(TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("subscribe", subscribe_command))
+    app.add_handler(CommandHandler("restart", restart_command))
+
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     app.add_handler(CallbackQueryHandler(button_handler))
 
+    app.post_init = set_commands
+
     app.run_polling()
+
