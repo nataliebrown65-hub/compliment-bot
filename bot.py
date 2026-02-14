@@ -264,7 +264,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ]
 
         await update.message.reply_text(
-            "Хочешь посмотреть что в других вариантах ответа или активируешь подписку? 👇",
+            "Хочешь посмотреть, что в других вариантах ответов или активируешь подписку? 👇",
             reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True),
         )
 
@@ -437,7 +437,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True),
         )
 
-    async def send_compliment_now(context, chat_id):
+async def send_compliment_now(context, chat_id):
         with open("compliments.json", "r", encoding="utf-8") as f:
             compliments = json.load(f)
 
