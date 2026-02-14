@@ -7,8 +7,6 @@ import os
 from datetime import time
 from zoneinfo import ZoneInfo
 
-import pytz
-
 
 from telegram import (
     Update,
@@ -468,13 +466,18 @@ async def send_daily_compliment(context: ContextTypes.DEFAULT_TYPE):
 async def start_daily_compliments(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
 
-    tz = pytz.timezone("Europe/Moscow")  # поменяй если нужно
+    # 🔥 Удаляем старые задачи для этого пользователя
+    for job in context.job_queue.get_jobs_by_name(str(chat_id)):
+        job.schedule_removal()
 
+    # 🔥 Запускаем новую ежедневную задачу
     context.job_queue.run_daily(
         send_daily_compliment,
-        time=time(hour=10, minute=0, tzinfo=ZoneInfo("Europe/Moscow")),
+        time=time(hour=11, minute=45, tzinfo=ZoneInfo("Europe/Moscow")),
         data={"chat_id": chat_id, "day": 0},
+        name=str(chat_id),  # важно!
     )
+
 
 
     # ---------- ЗАПУСК ----------
