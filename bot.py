@@ -3,10 +3,8 @@ import asyncio
 import json
 import os
 
-
 from datetime import time
 from zoneinfo import ZoneInfo
-
 
 from telegram import (
     Update,
@@ -27,8 +25,8 @@ from telegram.ext import (
 
 from telegram.error import BadRequest
 
-
 TOKEN = os.getenv("BOT_TOKEN")
+
 
 # ---------- ФУНКЦИЯ СОХРАНЕНИЯ ПОЛЬЗОВАТЕЛЯ ----------
 def save_user(chat_id):
@@ -44,7 +42,6 @@ def save_user(chat_id):
 
         with open("users.json", "w") as f:
             json.dump(users, f)
-
 
 
 # ---------- ХАКЕРСКИЙ ЭФФЕКТ ----------
@@ -96,10 +93,8 @@ async def hacker_print(message, text):
 
 # ---------- START ----------
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
     chat_id = update.effective_chat.id
     save_user(chat_id)
-
 
     # 🌹 Пролог
     await hacker_print(
@@ -171,7 +166,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
         return
-
 
     if text == "Да ❤️":
         await update.message.reply_text(
@@ -342,7 +336,6 @@ async def send_levels(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 
-
 def build_keyboard(levels):
     first_row = [InlineKeyboardButton(str(i), callback_data=str(i)) for i in levels if i <= 5]
     second_row = [InlineKeyboardButton(str(i), callback_data=str(i)) for i in levels if i > 5]
@@ -369,7 +362,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # 🌙 БЛОК "ТЫ ВЫБРАЛА"
     await hacker_print(query.message, f"<i>Ты выбрала {number} 🌚</i>")
-
 
     responses = {
         1: "<b>Твоя улыбка способна растопить любой мой плохой день 🫶</b>",
@@ -438,63 +430,59 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # ---------- ЕЖЕДНЕВНЫЕ КОМПЛИМЕНТЫ ----------
 
-    async def send_daily_compliment(context: ContextTypes.DEFAULT_TYPE):
-        print("🔥 Функция send_daily_compliment вызвана")
 
-        chat_id = context.job.data["chat_id"]
+async def send_daily_compliment(context: ContextTypes.DEFAULT_TYPE):
+    print("🔥 Функция send_daily_compliment вызвана")
 
-        with open("compliments.json", "r", encoding="utf-8") as f:
-            compliments = json.load(f)
+    chat_id = context.job.data["chat_id"]
 
-        if os.path.exists("progress.json"):
-            with open("progress.json", "r") as f:
-                progress = json.load(f)
-        else:
-            progress = {}
+    with open("compliments.json", "r", encoding="utf-8") as f:
+        compliments = json.load(f)
 
-        day_index = progress.get(str(chat_id), 0)
+    if os.path.exists("progress.json"):
+        with open("progress.json", "r") as f:
+            progress = json.load(f)
+    else:
+        progress = {}
 
-        if day_index < len(compliments):
-            await context.bot.send_message(
-                chat_id=chat_id,
-                text=compliments[day_index],
-            )
+    day_index = progress.get(str(chat_id), 0)
 
-            progress[str(chat_id)] = day_index + 1
-
-            with open("progress.json", "w") as f:
-                json.dump(progress, f)
-
-            print("✅ Комплимент отправлен:", day_index)
-
-    async def start_daily_compliments(update: Update, context: ContextTypes.DEFAULT_TYPE):
-        chat_id = update.effective_chat.id
-
-        # удаляем старые задачи
-        for job in context.job_queue.get_jobs_by_name(str(chat_id)):
-            job.schedule_removal()
-
-        # отправляем первый комплимент сразу
-        await send_daily_compliment(
-            type("obj", (object,), {
-                "bot": context.bot,
-                "job": type("job", (object,), {"data": {"chat_id": chat_id}})
-            })()
+    if day_index < len(compliments):
+        await context.bot.send_message(
+            chat_id=chat_id,
+            text=compliments[day_index],
         )
 
-        # запускаем ежедневную задачу
-        context.job_queue.run_daily(
-            send_daily_compliment,
-            time=time(hour=13, minute=58, tzinfo=ZoneInfo("Europe/Moscow")),
-            data={"chat_id": chat_id},
-            name=str(chat_id),
-        )
+        progress[str(chat_id)] = day_index + 1
 
-        print("🕒 Ежедневная задача зарегистрирована для:", chat_id)
+        with open("progress.json", "w") as f:
+            json.dump(progress, f)
 
-    # ---------- ЗАПУСК ----------
-import asyncio
-import os
+        print("✅ Комплимент отправлен:", day_index)
+
+
+async def start_daily_compliments(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+
+    # удаляем старые задачи
+    for job in context.job_queue.get_jobs_by_name(str(chat_id)):
+        job.schedule_removal()
+
+    # первый комплимент сразу
+    await context.bot.send_message(
+        chat_id=chat_id,
+        text="💌 С этого момента начинается твоя ежедневная порция любви..."
+    )
+
+    context.job_queue.run_daily(
+        send_daily_compliment,
+        time=time(hour=14, minute=11, tzinfo=ZoneInfo("Europe/Moscow")),
+        data={"chat_id": chat_id},
+        name=str(chat_id),
+    )
+
+    print("🕒 Ежедневная задача зарегистрирована для:", chat_id)
+
 
 # ---------- ЗАПУСК ----------
 
@@ -507,16 +495,8 @@ async def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     app.add_handler(CallbackQueryHandler(button_handler))
 
-    await app.initialize()
-    await app.start()
-    await app.updater.start_polling()
-
-    # держим процесс живым
-    while True:
-        await asyncio.sleep(3600)
+    await app.run_polling()
 
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-
