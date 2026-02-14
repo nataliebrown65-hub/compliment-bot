@@ -24,7 +24,7 @@ from telegram.ext import (
 from telegram.error import BadRequest
 
 
-TOKEN = "8538189701:AAHz9NlRKpEaeVmiR1Xta9A77nRQAHagmb0"
+TOKEN = "токен"
 
 
 # ---------- ХАКЕРСКИЙ ЭФФЕКТ ----------
