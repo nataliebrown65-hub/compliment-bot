@@ -30,6 +30,22 @@ from telegram.error import BadRequest
 
 TOKEN = os.getenv("BOT_TOKEN")
 
+# ---------- ФУНКЦИЯ СОХРАНЕНИЯ ПОЛЬЗОВАТЕЛЯ ----------
+def save_user(chat_id):
+    if not os.path.exists("users.json"):
+        with open("users.json", "w") as f:
+            json.dump([], f)
+
+    with open("users.json", "r") as f:
+        users = json.load(f)
+
+    if chat_id not in users:
+        users.append(chat_id)
+
+        with open("users.json", "w") as f:
+            json.dump(users, f)
+
+
 
 # ---------- ХАКЕРСКИЙ ЭФФЕКТ ----------
 async def hacker_print(message, text):
@@ -80,6 +96,13 @@ async def hacker_print(message, text):
 
 # ---------- START ----------
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    chat_id = update.effective_chat.id
+    save_user(chat_id)
+
+    # 🌹 Пролог
+    await hacker_print(
+
 
     # 🌹 Пролог
     await hacker_print(
@@ -253,7 +276,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=reply_markup,
         )
 
-        await start_daily_compliments(update, context)
 
     elif text == "🔄 Вернуться в начало":
         await update.message.reply_text(
