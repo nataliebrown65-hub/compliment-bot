@@ -464,24 +464,30 @@ async def send_daily_compliment(context: ContextTypes.DEFAULT_TYPE):
 async def start_daily_compliments(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
 
+    if context.job_queue is None:
+        print("❌ JobQueue не активен!")
+        return
+
     # удаляем старые задачи
     for job in context.job_queue.get_jobs_by_name(str(chat_id)):
         job.schedule_removal()
 
-    # первый комплимент сразу
+    # сообщение о старте
     await context.bot.send_message(
         chat_id=chat_id,
         text="💌 С этого момента начинается твоя ежедневная порция любви..."
     )
 
+    # регистрируем ежедневную задачу
     context.job_queue.run_daily(
         send_daily_compliment,
-        time=time(hour=14, minute=14, tzinfo=ZoneInfo("Europe/Moscow")),
+        time=time(hour=13, minute=58, tzinfo=ZoneInfo("Europe/Moscow")),
         data={"chat_id": chat_id},
         name=str(chat_id),
     )
 
     print("🕒 Ежедневная задача зарегистрирована для:", chat_id)
+
 
 
 # ---------- ЗАПУСК ----------
