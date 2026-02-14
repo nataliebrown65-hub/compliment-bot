@@ -469,7 +469,7 @@ async def start_daily_compliments(update: Update, context: ContextTypes.DEFAULT_
 
     context.job_queue.run_daily(
         send_daily_compliment,
-        time=time(hour=11, minute=16, tzinfo=tz),
+        time=time(hour=11, minute=30, tzinfo=tz),
         data={"chat_id": chat_id, "day": 0},
     )
 
