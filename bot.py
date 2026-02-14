@@ -444,55 +444,57 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
     # отправка комплимента"
-    async def send_compliment_now(context, chat_id):
-        with open("compliments.json", "r", encoding="utf-8") as f:
-            compliments = json.load(f)
 
-        total_days = len(compliments)
 
-        # Загружаем прогресс
-        if os.path.exists("progress.json"):
-            with open("progress.json", "r") as f:
-                progress = json.load(f)
-        else:
-            progress = {}
+async def send_compliment_now(context, chat_id):
+    with open("compliments.json", "r", encoding="utf-8") as f:
+        compliments = json.load(f)
 
-        user_id = str(chat_id)
+    total_days = len(compliments)
 
-        if user_id not in progress:
-            progress[user_id] = []
+    # Загружаем прогресс
+    if os.path.exists("progress.json"):
+        with open("progress.json", "r") as f:
+            progress = json.load(f)
+    else:
+        progress = {}
 
-        used_compliments = progress[user_id]
+    user_id = str(chat_id)
 
-        available = [c for c in compliments if c not in used_compliments]
+    if user_id not in progress:
+        progress[user_id] = []
 
-        # Если закончились — начинаем заново
-        if not available:
-            progress[user_id] = []
-            used_compliments = []
-            available = compliments.copy()
+    used_compliments = progress[user_id]
 
-        compliment = random.choice(available)
+    available = [c for c in compliments if c not in used_compliments]
 
-        # 💌 Номер дня
-        current_day = len(used_compliments) + 1
+    # Если закончились — начинаем заново
+    if not available:
+        progress[user_id] = []
+        used_compliments = []
+        available = compliments.copy()
 
-        message_text = (
-            f"💌 День {current_day} из {total_days}\n\n"
-            f"{compliment}"
-        )
+    compliment = random.choice(available)
 
-        await context.bot.send_message(
-            chat_id=chat_id,
-            text=message_text,
-        )
+    # 💌 Номер дня
+    current_day = len(used_compliments) + 1
 
-        progress[user_id].append(compliment)
+    message_text = (
+        f"💌 День {current_day} из {total_days}\n\n"
+        f"{compliment}"
+    )
 
-        with open("progress.json", "w") as f:
-            json.dump(progress, f)
+    await context.bot.send_message(
+        chat_id=chat_id,
+        text=message_text,
+    )
 
-    # ---------- ЕЖЕДНЕВНЫЕ КОМПЛИМЕНТЫ ----------
+    progress[user_id].append(compliment)
+
+    with open("progress.json", "w") as f:
+        json.dump(progress, f)
+
+# ---------- ЕЖЕДНЕВНЫЕ КОМПЛИМЕНТЫ ----------
 async def send_daily_compliment(context: ContextTypes.DEFAULT_TYPE):
     print("🔥 Функция send_daily_compliment вызвана")
 
@@ -505,7 +507,6 @@ async def send_daily_compliment(context: ContextTypes.DEFAULT_TYPE):
         return
 
     await send_compliment_now(context, chat_id)
-
 
 
 async def start_daily_compliments(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -525,7 +526,7 @@ async def start_daily_compliments(update: Update, context: ContextTypes.DEFAULT_
 
     context.job_queue.run_daily(
         send_daily_compliment,
-            time=time(hour=12, minute=00, tzinfo=ZoneInfo("Europe/Moscow")),
+        time=time(hour=12, minute=00, tzinfo=ZoneInfo("Europe/Moscow")),
         data={"chat_id": chat_id},
         name=str(chat_id),
     )
@@ -547,4 +548,3 @@ if __name__ == "__main__":
     app.add_handler(CallbackQueryHandler(button_handler))
 
     app.run_polling()
-
