@@ -262,6 +262,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ["💖 Активировать любовную подписку"],
             ["🔄 Вернуться в начало"]
         ]
+
+        await update.message.reply_text(
+            "Выбери действие ниже 👇",
+            reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True),
+        )
+
+
     elif text == "💖 Активировать любовную подписку":
         await update.message.reply_text(
             "Подключаю любовный сервер 💞",
@@ -272,23 +279,16 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         await start_daily_compliments(update, context)
 
-        keyboard = [["🔄 Вернуться в начало"]]
-        await update.message.reply_text(
-            "Давай посмотрим, что ещё тут есть 🔎",
-            reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True),
-        )
         await hacker_print(update.message, "❌ Система очищает предыдущий маршрут...")
         await hacker_print(update.message, "✅ Возврат к исходной точке выполнен")
 
-        await start(update, context)
-
-
-        reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+        keyboard = [["🔄 Вернуться в начало"]]
 
         await update.message.reply_text(
             "Если захочешь пройти всё заново — нажми ниже 👇",
-            reply_markup=reply_markup,
+            reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True),
         )
+
 
 
     elif text == "⬅ При нажатии кнопки произойдет переобувание 👟🔄👠":
@@ -437,7 +437,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True),
         )
 
- async def send_compliment_now(context, chat_id):
+    async def send_compliment_now(context, chat_id):
         with open("compliments.json", "r", encoding="utf-8") as f:
             compliments = json.load(f)
 
@@ -500,7 +500,7 @@ async def start_daily_compliments(update: Update, context: ContextTypes.DEFAULT_
 
     print("🕒 Ежедневная задача зарегистрирована для:", chat_id)
 
-
+    await send_compliment_now(context, chat_id)
 
 
 # ---------- ЗАПУСК ----------
