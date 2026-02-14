@@ -429,12 +429,18 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
     # ---------- ЕЖЕДНЕВНЫЕ КОМПЛИМЕНТЫ ----------
-
-
 async def send_daily_compliment(context: ContextTypes.DEFAULT_TYPE):
     print("🔥 Функция send_daily_compliment вызвана")
 
-    chat_id = context.job.data["chat_id"]
+    job = context.job
+    if not job or not job.data:
+        print("❌ Нет данных задачи")
+        return
+
+    chat_id = job.data.get("chat_id")
+    if not chat_id:
+        print("❌ chat_id отсутствует")
+        return
 
     with open("compliments.json", "r", encoding="utf-8") as f:
         compliments = json.load(f)
@@ -462,19 +468,35 @@ async def send_daily_compliment(context: ContextTypes.DEFAULT_TYPE):
 
 
 
-    # регистрируем ежедневную задачу
+async def start_daily_compliments(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+
+    if context.job_queue is None:
+        print("❌ JobQueue не активен!")
+        return
+
+    for job in context.job_queue.get_jobs_by_name(str(chat_id)):
+        job.schedule_removal()
+
+    await context.bot.send_message(
+        chat_id=chat_id,
+        text="💌 С этого момента начинается твоя ежедневная порция любви..."
+    )
+
     context.job_queue.run_daily(
         send_daily_compliment,
-        time=time(hour=17, minute=15, tzinfo=ZoneInfo("Europe/Moscow")),
+        time=time(hour=17, minute=26, tzinfo=ZoneInfo("Europe/Moscow")),
         data={"chat_id": chat_id},
         name=str(chat_id),
     )
 
     print("🕒 Ежедневная задача зарегистрирована для:", chat_id)
 
+    # 🔥 первый комплимент сразу
+    await send_daily_compliment(
+        type("obj", (), {"job": type("obj", (), {"data": {"chat_id": chat_id}})})
+    )
 
-
-# ---------- ЗАПУСК ----------
 
 # ---------- ЗАПУСК ----------
 
