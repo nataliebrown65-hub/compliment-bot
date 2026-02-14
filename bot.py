@@ -273,7 +273,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
         # 🔥 ВОТ ЭТО ДОБАВЬ
-        await start_daily_compliments(update, context)
+        await send_daily_compliment(context)
 
 
 
@@ -489,7 +489,7 @@ async def send_daily_compliment(context: ContextTypes.DEFAULT_TYPE):
         # Запускаем ежедневную задачу
         context.job_queue.run_daily(
             send_daily_compliment,
-            time=time(hour=13, minute=5, tzinfo=ZoneInfo("Europe/Moscow")),
+            time=time(hour=13, minute=14, tzinfo=ZoneInfo("Europe/Moscow")),
             data={"chat_id": chat_id},
             name=str(chat_id),
         )
