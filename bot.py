@@ -106,14 +106,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         update.message,
         "Ciao, amore mio❤️\n\n"
         "✨ Поздравляю тебя с Днём всех сильновлюбленных 🫶\n"
-        "Предлагаю тебе окунуться в его притягательную атмосферу,\n"
-        "и начать своё утро чего-то с действительно прекрасного ✨"
+        "И одной самовлюбленной 😏\n"
+        "Предлагаю тебе окунуться в его притягательную атмосферу, и начать своё утро чего-то с действительно прекрасного ✨"
     )
 
     await hacker_print(
         update.message,
-        "Если ты готова — следуй подсказкам системы\n"
-        "и просто наслаждайся процессом 🖤"
+        "Если ты готова — следуй подсказкам системы и просто наслаждайся процессом 🖤"
     )
 
     keyboard = [["💌 Получить наслаждение"]]
@@ -472,25 +471,28 @@ async def send_daily_compliment(context: ContextTypes.DEFAULT_TYPE):
 
         print("✅ Комплимент отправлен:", day_index)
 
+    async def start_daily_compliments(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        chat_id = update.effective_chat.id
 
+        # Удаляем старые задачи
+        for job in context.job_queue.get_jobs_by_name(str(chat_id)):
+            job.schedule_removal()
 
+        # Отправляем первый комплимент сразу
+        await send_daily_compliment(
+            type("obj", (object,), {
+                "bot": context.bot,
+                "job": type("job", (object,), {"data": {"chat_id": chat_id}})
+            })()
+        )
 
-async def start_daily_compliments(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    chat_id = update.effective_chat.id
-
-    # 🔥 Удаляем старые задачи для этого пользователя
-    for job in context.job_queue.get_jobs_by_name(str(chat_id)):
-        job.schedule_removal()
-
-    # 🔥 Запускаем новую ежедневную задачу
-    context.job_queue.run_daily(
-        send_daily_compliment,
-        time=time(hour=12, minute=45, tzinfo=ZoneInfo("Europe/Moscow")),
-        data={"chat_id": chat_id},
-        name=str(chat_id),  # важно!
-    )
-
-
+        # Запускаем ежедневную задачу
+        context.job_queue.run_daily(
+            send_daily_compliment,
+            time=time(hour=12, minute=52, tzinfo=ZoneInfo("Europe/Moscow")),
+            data={"chat_id": chat_id},
+            name=str(chat_id),
+        )
 
     # ---------- ЗАПУСК ----------
 def main():
