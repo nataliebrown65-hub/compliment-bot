@@ -264,7 +264,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ]
 
         await update.message.reply_text(
-            "Выбери действие ниже 👇",
+            "Хочешь посмотреть что в других вариантах ответа или активируешь подписку? 👇",
             reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True),
         )
 
@@ -275,7 +275,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=ReplyKeyboardRemove(),
         )
 
-        await hacker_print(update.message, "💌 Теперь каждый день ты будешь получать кое-что особенное...")
+        await hacker_print(update.message, "💌 Буквально немного времени")
 
         await start_daily_compliments(update, context)
 
@@ -493,7 +493,7 @@ async def start_daily_compliments(update: Update, context: ContextTypes.DEFAULT_
 
     context.job_queue.run_daily(
         send_daily_compliment,
-        time=time(hour=17, minute=26, tzinfo=ZoneInfo("Europe/Moscow")),
+            time=time(hour=18, minute=6, tzinfo=ZoneInfo("Europe/Moscow")),
         data={"chat_id": chat_id},
         name=str(chat_id),
     )
