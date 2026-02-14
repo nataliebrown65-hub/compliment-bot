@@ -5,6 +5,8 @@ import os
 
 
 from datetime import time
+from zoneinfo import ZoneInfo
+
 import pytz
 
 
@@ -99,9 +101,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     chat_id = update.effective_chat.id
     save_user(chat_id)
-
-    # 🌹 Пролог
-    await hacker_print(
 
 
     # 🌹 Пролог
@@ -275,6 +274,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "Если захочешь пройти всё заново — нажми ниже 👇",
             reply_markup=reply_markup,
         )
+
+        # 🔥 ВОТ ЭТО ДОБАВЬ
+        await start_daily_compliments(update, context)
+
 
 
     elif text == "🔄 Вернуться в начало":
@@ -469,13 +472,12 @@ async def start_daily_compliments(update: Update, context: ContextTypes.DEFAULT_
 
     context.job_queue.run_daily(
         send_daily_compliment,
-        time=time(hour=11, minute=30, tzinfo=tz),
+        time=time(hour=10, minute=0, tzinfo=ZoneInfo("Europe/Moscow")),
         data={"chat_id": chat_id, "day": 0},
     )
 
 
-
-# ---------- ЗАПУСК ----------
+    # ---------- ЗАПУСК ----------
 def main():
     print("Бот запущен...")
     app = ApplicationBuilder().token(TOKEN).build()
