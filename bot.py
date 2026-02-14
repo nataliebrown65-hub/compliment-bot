@@ -443,28 +443,54 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True),
         )
 
-async def send_compliment_now(context, chat_id):
+    # отправка комплимента"
+    async def send_compliment_now(context, chat_id):
         with open("compliments.json", "r", encoding="utf-8") as f:
             compliments = json.load(f)
 
+        total_days = len(compliments)
+
+        # Загружаем прогресс
         if os.path.exists("progress.json"):
             with open("progress.json", "r") as f:
                 progress = json.load(f)
         else:
             progress = {}
 
-        day_index = progress.get(str(chat_id), 0)
+        user_id = str(chat_id)
 
-        if day_index < len(compliments):
-            await context.bot.send_message(
-                chat_id=chat_id,
-                text=compliments[day_index],
-            )
+        if user_id not in progress:
+            progress[user_id] = []
 
-            progress[str(chat_id)] = day_index + 1
+        used_compliments = progress[user_id]
 
-            with open("progress.json", "w") as f:
-                json.dump(progress, f)
+        available = [c for c in compliments if c not in used_compliments]
+
+        # Если закончились — начинаем заново
+        if not available:
+            progress[user_id] = []
+            used_compliments = []
+            available = compliments.copy()
+
+        compliment = random.choice(available)
+
+        # 💌 Номер дня
+        current_day = len(used_compliments) + 1
+
+        message_text = (
+            f"💌 День {current_day} из {total_days}\n\n"
+            f"{compliment}"
+        )
+
+        await context.bot.send_message(
+            chat_id=chat_id,
+            text=message_text,
+        )
+
+        progress[user_id].append(compliment)
+
+        with open("progress.json", "w") as f:
+            json.dump(progress, f)
 
     # ---------- ЕЖЕДНЕВНЫЕ КОМПЛИМЕНТЫ ----------
 async def send_daily_compliment(context: ContextTypes.DEFAULT_TYPE):
