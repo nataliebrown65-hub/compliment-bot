@@ -476,7 +476,7 @@ async def start_daily_compliments(update: Update, context: ContextTypes.DEFAULT_
 
     context.job_queue.run_daily(
         send_daily_compliment,
-        time=time(hour=14, minute=11, tzinfo=ZoneInfo("Europe/Moscow")),
+        time=time(hour=14, minute=14, tzinfo=ZoneInfo("Europe/Moscow")),
         data={"chat_id": chat_id},
         name=str(chat_id),
     )
