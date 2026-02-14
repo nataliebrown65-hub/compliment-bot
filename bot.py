@@ -1,6 +1,8 @@
 import random
 import asyncio
 import json
+import os
+
 
 from datetime import time
 
@@ -24,7 +26,7 @@ from telegram.ext import (
 from telegram.error import BadRequest
 
 
-TOKEN = "BOT_TOKEN"
+TOKEN = os.getenv("BOT_TOKEN")
 
 
 # ---------- ХАКЕРСКИЙ ЭФФЕКТ ----------
