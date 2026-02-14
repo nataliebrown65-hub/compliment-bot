@@ -326,7 +326,7 @@ async def send_levels(update: Update, context: ContextTypes.DEFAULT_TYPE):
     levels = context.user_data["levels"]
     keyboard = build_keyboard(levels)
 
-    await hacker_print(update.message, "Поехали 🚀")
+    await hacker_print(update.message, "Поехали  🚀")
 
     # 🔥 Inline с цифрами
     await update.message.reply_text(
@@ -485,7 +485,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # запускаем ежедневную задачу
         context.job_queue.run_daily(
             send_daily_compliment,
-            time=time(hour=13, minute=44, tzinfo=ZoneInfo("Europe/Moscow")),
+            time=time(hour=13, minute=58, tzinfo=ZoneInfo("Europe/Moscow")),
             data={"chat_id": chat_id},
             name=str(chat_id),
         )
@@ -496,6 +496,8 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 import asyncio
 import os
 
+# ---------- ЗАПУСК ----------
+
 async def main():
     print("Бот запущен...")
 
@@ -505,12 +507,11 @@ async def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     app.add_handler(CallbackQueryHandler(button_handler))
 
-    # 🔥 ВАЖНО — не даем процессу завершиться
     await app.initialize()
     await app.start()
     await app.updater.start_polling()
 
-    # Держим процесс живым
+    # держим процесс живым
     while True:
         await asyncio.sleep(3600)
 
@@ -519,6 +520,3 @@ if __name__ == "__main__":
     asyncio.run(main())
 
 
-
-if __name__ == "__main__":
-    main()
