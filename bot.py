@@ -444,22 +444,34 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def send_daily_compliment(context: ContextTypes.DEFAULT_TYPE):
     print("🔥 Функция send_daily_compliment вызвана")
 
+    chat_id = context.job.data["chat_id"]
+
+    # Загружаем комплименты
     with open("compliments.json", "r", encoding="utf-8") as f:
         compliments = json.load(f)
 
-    day_index = context.job.data["day"]
-    chat_id = context.job.data["chat_id"]
+    # Загружаем прогресс
+    if os.path.exists("progress.json"):
+        with open("progress.json", "r") as f:
+            progress = json.load(f)
+    else:
+        progress = {}
 
-    print("➡ Отправляем комплимент номер:", day_index)
+    day_index = progress.get(str(chat_id), 0)
 
     if day_index < len(compliments):
         await context.bot.send_message(
             chat_id=chat_id,
             text=compliments[day_index],
         )
-        context.job.data["day"] += 1
 
-        print("✅ Комплимент отправлен")
+        progress[str(chat_id)] = day_index + 1
+
+        with open("progress.json", "w") as f:
+            json.dump(progress, f)
+
+        print("✅ Комплимент отправлен:", day_index)
+
 
 
 
@@ -473,8 +485,8 @@ async def start_daily_compliments(update: Update, context: ContextTypes.DEFAULT_
     # 🔥 Запускаем новую ежедневную задачу
     context.job_queue.run_daily(
         send_daily_compliment,
-        time=time(hour=11, minute=45, tzinfo=ZoneInfo("Europe/Moscow")),
-        data={"chat_id": chat_id, "day": 0},
+        time=time(hour=12, minute=45, tzinfo=ZoneInfo("Europe/Moscow")),
+        data={"chat_id": chat_id},
         name=str(chat_id),  # важно!
     )
 
