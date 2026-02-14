@@ -481,7 +481,7 @@ async def start_daily_compliments(update: Update, context: ContextTypes.DEFAULT_
     # регистрируем ежедневную задачу
     context.job_queue.run_daily(
         send_daily_compliment,
-        time=time(hour=17, minute=00, tzinfo=ZoneInfo("Europe/Moscow")),
+        time=time(hour=17, minute=7, tzinfo=ZoneInfo("Europe/Moscow")),
         data={"chat_id": chat_id},
         name=str(chat_id),
     )
@@ -492,7 +492,9 @@ async def start_daily_compliments(update: Update, context: ContextTypes.DEFAULT_
 
 # ---------- ЗАПУСК ----------
 
-async def main():
+# ---------- ЗАПУСК ----------
+
+if __name__ == "__main__":
     print("Бот запущен...")
 
     app = ApplicationBuilder().token(TOKEN).build()
@@ -501,9 +503,5 @@ async def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     app.add_handler(CallbackQueryHandler(button_handler))
 
-    await app.run_polling()
-
-
-if __name__ == "__main__":
     app.run_polling()
 
