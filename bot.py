@@ -273,7 +273,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
         # 🔥 ВОТ ЭТО ДОБАВЬ
-        await send_daily_compliment(context)
+        await start_daily_compliments(update, context)
 
 
 
@@ -436,49 +436,45 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True),
         )
 
+    # ---------- ЕЖЕДНЕВНЫЕ КОМПЛИМЕНТЫ ----------
 
+    async def send_daily_compliment(context: ContextTypes.DEFAULT_TYPE):
+        print("🔥 Функция send_daily_compliment вызвана")
 
+        chat_id = context.job.data["chat_id"]
 
-# ---------- ЕЖЕДНЕВНЫЕ КОМПЛИМЕНТЫ ----------
-async def send_daily_compliment(context: ContextTypes.DEFAULT_TYPE):
-    print("🔥 Функция send_daily_compliment вызвана")
+        with open("compliments.json", "r", encoding="utf-8") as f:
+            compliments = json.load(f)
 
-    chat_id = context.job.data["chat_id"]
+        if os.path.exists("progress.json"):
+            with open("progress.json", "r") as f:
+                progress = json.load(f)
+        else:
+            progress = {}
 
-    # Загружаем комплименты
-    with open("compliments.json", "r", encoding="utf-8") as f:
-        compliments = json.load(f)
+        day_index = progress.get(str(chat_id), 0)
 
-    # Загружаем прогресс
-    if os.path.exists("progress.json"):
-        with open("progress.json", "r") as f:
-            progress = json.load(f)
-    else:
-        progress = {}
+        if day_index < len(compliments):
+            await context.bot.send_message(
+                chat_id=chat_id,
+                text=compliments[day_index],
+            )
 
-    day_index = progress.get(str(chat_id), 0)
+            progress[str(chat_id)] = day_index + 1
 
-    if day_index < len(compliments):
-        await context.bot.send_message(
-            chat_id=chat_id,
-            text=compliments[day_index],
-        )
+            with open("progress.json", "w") as f:
+                json.dump(progress, f)
 
-        progress[str(chat_id)] = day_index + 1
-
-        with open("progress.json", "w") as f:
-            json.dump(progress, f)
-
-        print("✅ Комплимент отправлен:", day_index)
+            print("✅ Комплимент отправлен:", day_index)
 
     async def start_daily_compliments(update: Update, context: ContextTypes.DEFAULT_TYPE):
         chat_id = update.effective_chat.id
 
-        # Удаляем старые задачи
+        # удаляем старые задачи
         for job in context.job_queue.get_jobs_by_name(str(chat_id)):
             job.schedule_removal()
 
-        # Отправляем первый комплимент сразу
+        # отправляем первый комплимент сразу
         await send_daily_compliment(
             type("obj", (object,), {
                 "bot": context.bot,
@@ -486,13 +482,15 @@ async def send_daily_compliment(context: ContextTypes.DEFAULT_TYPE):
             })()
         )
 
-        # Запускаем ежедневную задачу
+        # запускаем ежедневную задачу
         context.job_queue.run_daily(
             send_daily_compliment,
-            time=time(hour=13, minute=14, tzinfo=ZoneInfo("Europe/Moscow")),
+            time=time(hour=13, minute=28, tzinfo=ZoneInfo("Europe/Moscow")),
             data={"chat_id": chat_id},
             name=str(chat_id),
         )
+
+        print("🕒 Ежедневная задача зарегистрирована для:", chat_id)
 
     # ---------- ЗАПУСК ----------
 def main():
