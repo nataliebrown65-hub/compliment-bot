@@ -275,13 +275,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=ReplyKeyboardRemove(),
         )
 
-        await hacker_print(update.message, "💌 Буквально немного времени")
+        await hacker_print(update.message, "Буквально немного времени 🕰")
 
         await start_daily_compliments(update, context)
 
         await hacker_print(
             update.message,
-            "💘 Подписка активирована. Теперь я буду писать тебе каждый день."
+            "💘 Твоя подписка активирована. \nТеперь я буду с тобой ежедневно 🤍"
         )
 
     elif text == "🔄 Вернуться в начало":
@@ -494,7 +494,7 @@ async def start_daily_compliments(update: Update, context: ContextTypes.DEFAULT_
 
     await context.bot.send_message(
         chat_id=chat_id,
-        text="Теперь я буду с тобой ежедневно 🤍"
+        text="И так, мы начинаем"
     )
 
     context.job_queue.run_daily(
