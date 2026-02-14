@@ -279,15 +279,21 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         await start_daily_compliments(update, context)
 
+        await hacker_print(
+            update.message,
+            "💘 Подписка активирована. Теперь я буду писать тебе каждый день."
+        )
+
+    elif text == "🔄 Вернуться в начало":
+        await update.message.reply_text(
+            "Перезапуск сценария...",
+            reply_markup=ReplyKeyboardRemove(),
+        )
+
         await hacker_print(update.message, "❌ Система очищает предыдущий маршрут...")
         await hacker_print(update.message, "✅ Возврат к исходной точке выполнен")
 
-        keyboard = [["🔄 Вернуться в начало"]]
-
-        await update.message.reply_text(
-            "Если захочешь пройти всё заново — нажми ниже 👇",
-            reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True),
-        )
+        await start(update, context)
 
 
 
