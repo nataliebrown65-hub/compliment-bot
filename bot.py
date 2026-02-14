@@ -258,7 +258,31 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await hacker_print(update.message, "Советую не выключать уведомления 🤍")
         await hacker_print(update.message, "С этого момента каждый день для тебя здесь будет кое-что 💌")
 
+        keyboard = [
+            ["💖 Активировать любовную подписку"],
+            ["🔄 Вернуться в начало"]
+        ]
+    elif text == "💖 Активировать любовную подписку":
+        await update.message.reply_text(
+            "Подключаю любовный сервер 💞",
+            reply_markup=ReplyKeyboardRemove(),
+        )
+
+        await hacker_print(update.message, "💌 Теперь каждый день ты будешь получать кое-что особенное...")
+
+        await start_daily_compliments(update, context)
+
         keyboard = [["🔄 Вернуться в начало"]]
+        await update.message.reply_text(
+            "Давай посмотрим, что ещё тут есть 🔎",
+            reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True),
+        )
+        await hacker_print(update.message, "❌ Система очищает предыдущий маршрут...")
+        await hacker_print(update.message, "✅ Возврат к исходной точке выполнен")
+
+        await start(update, context)
+
+
         reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
         await update.message.reply_text(
@@ -266,21 +290,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=reply_markup,
         )
 
-        # 🔥 ВОТ ЭТО ДОБАВЬ
-        await start_daily_compliments(update, context)
-
-
-
-    elif text == "🔄 Вернуться в начало":
-        await update.message.reply_text(
-            "Давай посмотрим, что ещё тут есть 🔎",
-            reply_markup=ReplyKeyboardRemove(),
-        )
-
-        await hacker_print(update.message, "❌ Система очищает предыдущий маршрут...")
-        await hacker_print(update.message, "✅ Возврат к исходной точке выполнен")
-
-        await start(update, context)
 
     elif text == "⬅ При нажатии кнопки произойдет переобувание 👟🔄👠":
         await update.message.reply_text(
@@ -428,43 +437,42 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True),
         )
 
+ async def send_compliment_now(context, chat_id):
+        with open("compliments.json", "r", encoding="utf-8") as f:
+            compliments = json.load(f)
+
+        if os.path.exists("progress.json"):
+            with open("progress.json", "r") as f:
+                progress = json.load(f)
+        else:
+            progress = {}
+
+        day_index = progress.get(str(chat_id), 0)
+
+        if day_index < len(compliments):
+            await context.bot.send_message(
+                chat_id=chat_id,
+                text=compliments[day_index],
+            )
+
+            progress[str(chat_id)] = day_index + 1
+
+            with open("progress.json", "w") as f:
+                json.dump(progress, f)
+
     # ---------- ЕЖЕДНЕВНЫЕ КОМПЛИМЕНТЫ ----------
 async def send_daily_compliment(context: ContextTypes.DEFAULT_TYPE):
     print("🔥 Функция send_daily_compliment вызвана")
 
     job = context.job
     if not job or not job.data:
-        print("❌ Нет данных задачи")
         return
 
     chat_id = job.data.get("chat_id")
     if not chat_id:
-        print("❌ chat_id отсутствует")
         return
 
-    with open("compliments.json", "r", encoding="utf-8") as f:
-        compliments = json.load(f)
-
-    if os.path.exists("progress.json"):
-        with open("progress.json", "r") as f:
-            progress = json.load(f)
-    else:
-        progress = {}
-
-    day_index = progress.get(str(chat_id), 0)
-
-    if day_index < len(compliments):
-        await context.bot.send_message(
-            chat_id=chat_id,
-            text=compliments[day_index],
-        )
-
-        progress[str(chat_id)] = day_index + 1
-
-        with open("progress.json", "w") as f:
-            json.dump(progress, f)
-
-        print("✅ Комплимент отправлен:", day_index)
+    await send_compliment_now(context, chat_id)
 
 
 
@@ -480,7 +488,7 @@ async def start_daily_compliments(update: Update, context: ContextTypes.DEFAULT_
 
     await context.bot.send_message(
         chat_id=chat_id,
-        text="💌 С этого момента начинается твоя ежедневная порция любви..."
+        text="Теперь я буду с тобой ежедневно 🤍"
     )
 
     context.job_queue.run_daily(
@@ -492,10 +500,7 @@ async def start_daily_compliments(update: Update, context: ContextTypes.DEFAULT_
 
     print("🕒 Ежедневная задача зарегистрирована для:", chat_id)
 
-    # 🔥 первый комплимент сразу
-    await send_daily_compliment(
-        type("obj", (), {"job": type("obj", (), {"data": {"chat_id": chat_id}})})
-    )
+
 
 
 # ---------- ЗАПУСК ----------
